@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from app.schemas import TaskCreate, TaskUpdate
+from app.schemas import TaskCreate, TaskUpdate, StudentCreate
 
 # FastAPI объект с настройками
 app = FastAPI(
@@ -59,3 +59,22 @@ def search_tasks(q: str="", limit: int=10):
     return result[:int(limit)]
 
 # Со следующей строки добавляйте эндпоинты для students
+@app.post("/create_kalinichenko_i_v" , status_code=201)
+def create_kalinichenko_i_v():
+    new_student = {
+        "id": len(STUDENTS) + 1,
+        "first_name": "Irina",
+        "second_name": "Kalinichenko",
+        "group": 1,
+        "course": 4,
+        }
+    STUDENTS.append(new_student)
+    return new_student
+
+@app.get("/get_kalinichenko_i_v")
+def get_kalinichenko_i_v():
+    for student in STUDENTS:
+        if student["second_name"] == "Kalinichenko":
+            return student
+    raise HTTPException(status_code=404, detail="Студент не найден")
+
