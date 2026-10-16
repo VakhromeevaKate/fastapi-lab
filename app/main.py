@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from app.schemas import TaskCreate, TaskUpdate
 
-# FastAPI объект с настройками
 app = FastAPI(
     title="Task API",
     description="API для работы с задачами, написанное с FastAPI",
@@ -9,12 +9,13 @@ app = FastAPI(
 )
 
 TASKS: list[dict] = []
-
 STUDENTS: list[dict] = []
 
 @app.get("/")
 def root():
     return {"message": "Hello, WORLD!"}
+
+# --- Эндпоинты для задач (были изначально) ---
 
 @app.get("/tasks")
 def get_tasks():
@@ -56,6 +57,24 @@ def search_tasks(q: str="", limit: int=10):
     for task in TASKS:
         if task["title"].find(q) != -1:
             result.append(task)
-    return result[:int(limit)]
+    return result
 
-# Со следующей строки добавляйте эндпоинты для students
+# Эндпоинты для студентов
+
+class Student(BaseModel):
+    first_name: str
+    last_name: str
+    group: str
+    age: int
+
+@app.post("/students/", status_code=201)
+def create_student(student: Student):
+    STUDENTS.append(student)
+    return {"message": "Студент добавлен", "student": student}
+
+@app.get("/students/{student_name}")
+def get_student(student_name: str):
+    for student in STUDENTS:
+        if student.first_name.lower() == student_name.lower() or student.last_name.lower() == student_name.lower():
+            return student
+    raise HTTPException(status_code=404, detail="Студент не найден")
