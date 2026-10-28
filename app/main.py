@@ -68,3 +68,20 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     return db.query(Task).all()
 
 # Со следующей строки добавляйте эндпоинты для students
+
+@app.post("/create_elizaveta")
+def create_elizaveta(student: dict):
+    STUDENTS.append(student)
+    return {
+        "message": "Студент добавлен",
+        "student": student
+    }
+
+
+@app.get("/get_elizaveta")
+def get_elizaveta(name: str):
+    for student in STUDENTS:
+        if student.get("name", "").lower() == name.lower():
+            return student
+
+    raise HTTPException(status_code=404, detail="Студент не найден")
