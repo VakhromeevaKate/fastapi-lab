@@ -1,3 +1,5 @@
+from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel, Field
 from typing import Optional
 
@@ -10,6 +12,15 @@ class TaskUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=200)
     done: Optional[bool] = None
     priority: Optional[int] = Field(default=None, ge=1, le=5)
+
+class TaskOut(BaseModel):
+    id: int
+    title: str
+    done: bool
+    priority: int
+    created_at: datetime
+    updated_at: datetime
+    model_config = {"from_attributes": True}
 
 class StudentCreate(BaseModel):
     first_name: str = Field(min_length=1, max_length=200)

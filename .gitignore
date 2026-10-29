@@ -1,0 +1,25 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Visual Studio
+.vs/
+v18/
+*.user
+*.suo
+*.slnx
+*.sqlite
+ProjectSettings.json
+VSWorkspaceState.json
+DocumentLayout.json
+DocumentLayout.backup
+.wsuo
+
+# Node (на всякий случай)
+node_modules/
