@@ -67,39 +67,29 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     db.commit()
     return db.query(Task).all()
 
+# Со следующей строки - эндпоинты для students
 from pydantic import BaseModel
 
-class StudentCreate(BaseModel):
+STUDENT_NAME = "Fedor"
+
+class Student(BaseModel):
     name: str
-    age: int = 20
+    age: int
+    group: str
 
-
-@app.post("/students", status_code=201)
-def create_liza(payload: StudentCreate):
-    student = {
+@app.post(f"/create_{STUDENT_NAME}")
+def create_student(student: Student):
+    new_student = {
         "id": len(STUDENTS) + 1,
-        "name": payload.name,
-        "age": payload.age
+        **payload.model_dump()
     }
-# Со следующей строки добавляйте эндпоинты для students
-@app.post("/create_maria", status_code=201)
-def create_maria(payload: StudentCreate):
-    student = payload.model_dump()
-    STUDENTS.append(student)
-    return student
+    STUDENTS.append(new_student)
+    return new_student
 
-
-@app.get("/get_maria")
-def get_ivan():
-    for student in STUDENTS:
-        if student["first_name"].lower() == "maria":
-            return student
-    raise HTTPException(status_code=404, detail="Студент не найден")
-
-
-@app.get("/students/{student_name}")
-def get_student(student_name: str):
-    for student in STUDENTS:
-        if student["name"] == student_name:
-            return student
-    raise HTTPException(status_code=404, detail="Студент не найден")
+@app.get(f"/get_{STUDENT_NAME}")
+def get_students(student_name: str):
+    if student_name is not None:
+        for student in STUDENTS:
+            if student["name"].lower() == student_name.lower():
+                return student
+        raise HTTPException(status_code=404, detail="Студент не найден")
