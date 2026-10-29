@@ -1,16 +1,18 @@
+from pydantic import BaseModel
+from app.schemas import TaskCreate, TaskUpdate
 from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.database import Base, engine, get_db
 from app.models import Task
 from app.schemas import TaskCreate, TaskOut, TaskUpdate, StudentCreate
 
-# FastAPI объект с настройками
 app = FastAPI(
     title="Task API",
     description="API для работы с задачами, написанное с FastAPI",
     version="0.2.0"
 )
 
+TASKS: list[dict] = []
 # Создаём таблицы при старте (для лабораторной; в реальном проекте — Alembic)
 Base.metadata.create_all(bind=engine)
 
@@ -19,6 +21,8 @@ STUDENTS: list[dict] = []
 @app.get("/")
 def root():
     return {"message": "Hello, WORLD!"}
+
+# --- Эндпоинты для задач (были изначально) ---
 
 @app.get("/tasks")
 def list_tasks(db: Session = Depends(get_db)):
@@ -60,26 +64,27 @@ def update_task(task_id: int, patch: TaskUpdate, db: Session = Depends(get_db)):
     db.refresh(task)
     return task
 
-@app.delete("/tasks/{task_id}")
+# Эндпоинты для студентов
+
+class Student(BaseModel):
+    first_name: str
+    last_name: str
+    group: str
+    age: int
+
+@app.post("/students/", status_code=201)
+def create_student(student: Student):
+    STUDENTS.append(student)
+    return {"message": "Студент добавлен", "student": student}
+
+@app.get("/students/{student_name}")
+def get_student(student_name: str):
+    for student in STUDENTS:
+        if student.first_name.lower() == student_name.lower() or student.last_name.lower() == student_name.lower():
+            return student
+    raise HTTPException(status_code=404, detail="Студент не найден")
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     task = get_task_by_id(task_id, db)
     db.delete(task)
     db.commit()
     return db.query(Task).all()
-
-# Со следующей строки добавляйте эндпоинты для students
-from pydantic import BaseModel
-class Student(BaseModel):
-    age: int
-    major: str
-STUDENTS: = {}
-@app.post("/create_{student_name}")
-def create_student(student_name: str, student: Student):
-    STUDENTS[student_name] = student
-    return {"status": "success", "message": f"Студент {student_name} добавлен",
-"data": student}
-@app.get("/get_{student_name}")
-def get_student(student_name: str):
-    if student_name in STUDENTS:
-        return {"status": "success", "student_name": student_name, "data": STUDENTS[student_name]}
-    return {"status": "error", "message": "Студент не найден"}
