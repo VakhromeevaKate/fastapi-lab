@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.database import Base, engine, get_db
 from app.models import Task
-from app.schemas import TaskCreate, TaskOut, TaskUpdate
+from app.schemas import TaskCreate, TaskOut, TaskUpdate, StudentCreate
 
 # FastAPI объект с настройками
 app = FastAPI(
